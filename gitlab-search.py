@@ -71,6 +71,7 @@ def search(gitlab_server, token, file_filter, text, group=None, project_filter=N
                             "project": project.name,
                             "file": file['path']
                         })
+                        print(f"Project: {project.name} - File: {file['path']}")
     
     return return_value
 
@@ -97,4 +98,5 @@ if __name__ == '__main__':
     group_arg          = None if args.GROUP          == None else args.GROUP
     project_filter_arg = None if args.PROJECT_FILTER == None else args.PROJECT_FILTER
 
-    print(search(gitlab_server_arg, token_arg, file_filter_arg, text_arg, group_arg, project_filter_arg, api_debug_arg, internal_debug_arg, regex_arg))
+    # print(search(gitlab_server_arg, token_arg, file_filter_arg, text_arg, group_arg, project_filter_arg, api_debug_arg, internal_debug_arg, regex_arg))
+    search(gitlab_server_arg, token_arg, file_filter_arg, text_arg, group_arg, project_filter_arg, api_debug_arg, internal_debug_arg, regex_arg)
