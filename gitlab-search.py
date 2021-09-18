@@ -51,24 +51,26 @@ def search(gitlab_server, token, file_filter, text, group=None, project_filter=N
             print(str(e), "Error getting tree in project:", project.name)
 
         for file in files:
-            if internal_debug:
-                fpath = file.get('path',None) if file.get('path',None)!=None else file.get('name',None)
-                eprint("  File: ",fpath)
+            ftype = file.get('type',None)
+            if ftype != 'tree':
+                if internal_debug:
+                    fpath = file.get('path',None) if file.get('path',None)!=None else file.get('name',None)
+                    eprint("  File: ",fpath)
 
-            if filename_regex:
-                matches=re.findall(file_filter, file['name'])
-                filename_matches = len(matches)>0
-            else:
-                filename_matches=file_filter == file['name']
+                if filename_regex:
+                    matches=re.findall(file_filter, file['name'])
+                    filename_matches = len(matches)>0
+                else:
+                    filename_matches=file_filter == file['name']
             
-            if filename_matches:
-                file_content = project.files.raw(file_path=file['path'], ref='master')
+                if filename_matches:
+                    file_content = project.files.raw(file_path=file['path'], ref='develop')
                 
-                if text in str(file_content):
-                    return_value.append({
-                        "project": project.name,
-                        "file": file['path']
-                    })
+                    if text in str(file_content):
+                        return_value.append({
+                            "project": project.name,
+                            "file": file['path']
+                        })
     
     return return_value
 
