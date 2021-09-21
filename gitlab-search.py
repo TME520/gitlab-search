@@ -64,7 +64,15 @@ def search(gitlab_server, token, file_filter, text, group=None, project_filter=N
                     filename_matches=file_filter == file['name']
             
                 if filename_matches:
-                    file_content = project.files.raw(file_path=file['path'], ref='develop')
+                    try:
+                        file_content = project.files.raw(file_path=file['path'], ref='develop')
+                    except Exception as e:
+                        try:
+                            print(f"Failed to scan file {file['path']} from branch develop")
+                            file_content = project.files.raw(file_path=file['path'], ref='master')
+                        except Exception as f:
+                            print(f"Failed to scan file {file['path']} from branch master")
+                            pass
                 
                     if text in str(file_content):
                         return_value.append({
