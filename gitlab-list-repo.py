@@ -11,8 +11,6 @@ def eprint(*args, **kwargs):
 def search(gitlab_server, token, file_filter, text, group=None, project_filter=None, api_debug=False, internal_debug=False, filename_regex=False):
     return_value = []
     
-    print(f'gitlab_server: {gitlab_server}, token: {token}, file_filter: {file_filter}, text: {text}, group: {group}, project_filter: {project_filter}, api_debug: {api_debug}, internal_debug: {internal_debug}, filename_regex: {filename_regex}')
-
     gl = gitlab.Gitlab(gitlab_server, private_token=token)
     if api_debug:
         gl.enable_debug()
@@ -46,45 +44,6 @@ def search(gitlab_server, token, file_filter, text, group=None, project_filter=N
                 path = project.name
             eprint("Project: ",path)
 
-        files = []
-        try:
-            files = project.repository_tree(recursive=True, all=True)
-        except Exception as e:
-            print(str(e), "Error getting tree in project:", project.name)
-
-        for file in files:
-            ftype = file.get('type',None)
-            if ftype != 'tree':
-                if internal_debug:
-                    fpath = file.get('path',None) if file.get('path',None)!=None else file.get('name',None)
-                    eprint("  Inspecting file: ",fpath)
-
-                if filename_regex:
-                    matches=re.findall(file_filter, file['name'])
-                    filename_matches = len(matches)>0
-                else:
-                    filename_matches=file_filter == file['name']
-            
-                if filename_matches:
-                    try:
-                        file_content = project.files.raw(file_path=file['path'], ref='develop')
-                    except Exception as e:
-                        try:
-                            # print(f"Failed to scan file {file['path']} from branch develop")
-                            file_content = project.files.raw(file_path=file['path'], ref='master')
-                        except Exception as f:
-                            # print(f"Failed to scan file {file['path']} from branch master")
-                            pass
-                
-                    if text in str(file_content):
-                        return_value.append({
-                            "project": project.name,
-                            "file": file['path']
-                        })
-                        print(f"[MATCH] Project: {project.name} - File: {file['path']}")
-    
-    return return_value
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--api-debug",        action="store_true", help="Show all API calls")
@@ -108,5 +67,4 @@ if __name__ == '__main__':
     group_arg          = None if args.GROUP          == None else args.GROUP
     project_filter_arg = None if args.PROJECT_FILTER == None else args.PROJECT_FILTER
 
-    # print(search(gitlab_server_arg, token_arg, file_filter_arg, text_arg, group_arg, project_filter_arg, api_debug_arg, internal_debug_arg, regex_arg))
     search(gitlab_server_arg, token_arg, file_filter_arg, text_arg, group_arg, project_filter_arg, api_debug_arg, internal_debug_arg, regex_arg)
